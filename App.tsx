@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import { Transaction, Category, View, TransactionType } from './types';
+import { Transaction, Category, View, TransactionType, TransactionStatus } from './types';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import TransactionList from './components/TransactionList';
@@ -49,11 +48,11 @@ const App: React.FC = () => {
   
   const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
     const newTransaction: Transaction = { ...transaction, id: crypto.randomUUID() };
-    setTransactions(prev => [newTransaction, ...prev]);
+    setTransactions(prev => [newTransaction, ...prev].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
   };
   
   const updateTransaction = (updatedTransaction: Transaction) => {
-    setTransactions(prev => prev.map(t => t.id === updatedTransaction.id ? updatedTransaction : t));
+    setTransactions(prev => prev.map(t => t.id === updatedTransaction.id ? updatedTransaction : t).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
   };
   
   const deleteTransaction = (id: string) => {
@@ -76,9 +75,9 @@ const App: React.FC = () => {
         alert("Tiada data untuk di-backup.");
         return;
     }
-    const header = "id,date,type,description,amount,categoryId\n";
+    const header = "id,date,type,description,amount,categoryId,status\n";
     const csvContent = transactions.map(t => 
-        `${t.id},${t.date},${t.type},"${t.description.replace(/"/g, '""')}",${t.amount},${t.categoryId}`
+        `${t.id},${t.date},${t.type},"${t.description.replace(/"/g, '""')}",${t.amount},${t.categoryId},${t.status || 'cleared'}`
     ).join("\n");
     const blob = new Blob([header + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
@@ -100,17 +99,18 @@ const App: React.FC = () => {
             const text = e.target?.result as string;
             const rows = text.split('\n').slice(1); // skip header
             const restoredTransactions: Transaction[] = rows.map(row => {
-                const columns = row.split(',');
-                if (columns.length < 6) return null;
+                const columns = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); // handle commas inside quotes
+                if (columns.length < 6) return null; // status can be optional for backward compatibility
                 return {
                     id: columns[0],
                     date: columns[1],
                     type: columns[2] as TransactionType,
                     description: columns[3].slice(1, -1).replace(/""/g, '"'), // handle quotes
                     amount: parseFloat(columns[4]),
-                    categoryId: columns[5]
+                    categoryId: columns[5],
+                    status: (columns[6] as TransactionStatus) || 'cleared'
                 };
-            }).filter((t): t is Transaction => t !== null && !isNaN(t.amount));
+            }).filter((t): t is Transaction => !!(t !== null && t.id && t.date && t.type && t.description && !isNaN(t.amount) && t.categoryId && t.status));
 
             if (restoredTransactions.length > 0) {
                 if (window.confirm(`Anda pasti mahu menggantikan ${transactions.length} rekod sedia ada dengan ${restoredTransactions.length} rekod baru?`)) {
@@ -148,7 +148,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen font-sans text-gray-800 dark:text-gray-200 transition-colors duration-300 ${isTutorialActive ? 'overflow-hidden' : ''}`}>
+    <div className={`min-h-screen font-sans text-slate-800 dark:text-slate-200 transition-colors duration-300 ${isTutorialActive ? 'overflow-hidden' : ''}`}>
       <Header 
         currentView={view}
         setView={setView}

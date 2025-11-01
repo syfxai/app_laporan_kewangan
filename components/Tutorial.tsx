@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 
 interface TutorialProps {
@@ -38,7 +37,7 @@ const tutorialSteps = [
   },
    {
     element: '[href="#reports"]', // This is a trick to target the reports nav link
-    selector: '[data-tutorial="step-1"] a[href="#reports"], [data-tutorial="step-1"] button:nth-child(3)',
+    selector: '[data-tutorial="step-1"] button:nth-child(3)',
     title: 'Laporan Kewangan',
     text: 'Pergi ke bahagian Laporan untuk menjana penyata kewangan bulanan atau tahunan. Anda boleh mengeksportnya ke format PDF atau Excel untuk tujuan audit.',
     position: 'bottom',
@@ -49,20 +48,23 @@ const Tutorial: React.FC<TutorialProps> = ({ onFinish }) => {
   const [stepIndex, setStepIndex] = useState(0);
 
   const currentStep = tutorialSteps[stepIndex];
-  const targetElement = document.querySelector(currentStep.element);
-
+  
   useEffect(() => {
     // If the element for the current step is not visible, we might need to navigate.
     // For this app, step 6 requires clicking the "Laporan" button.
     if(stepIndex === 5){
-      const reportsButton = document.querySelector('[data-tutorial="step-1"] button:nth-child(3)') as HTMLElement | null;
-      reportsButton?.click();
+      const reportsButton = Array.from(document.querySelectorAll('[data-tutorial="step-1"] button')).find(btn => (btn as HTMLElement).innerText.includes('Laporan'));
+      (reportsButton as HTMLElement)?.click();
+    }
+     if(stepIndex === 0){
+      const dashboardButton = Array.from(document.querySelectorAll('[data-tutorial="step-1"] button')).find(btn => (btn as HTMLElement).innerText.includes('Papan Pemuka'));
+      (dashboardButton as HTMLElement)?.click();
     }
   }, [stepIndex]);
+  
+  const targetElement = document.querySelector(currentStep.element);
 
   if (!targetElement) {
-    // This could happen if the component isn't mounted yet. Let's not render the tutorial.
-    // It's a simple fallback.
     return null;
   }
 
@@ -73,11 +75,12 @@ const Tutorial: React.FC<TutorialProps> = ({ onFinish }) => {
     transform: 'translate(-50%, 16px)',
     top: `${top + height}px`,
     left: `${left + width / 2}px`,
+    transition: 'top 0.3s ease-in-out, left 0.3s ease-in-out',
   };
 
   if (currentStep.position === 'top') {
-    tooltipStyle.transform = 'translate(-50%, -100%)';
-    tooltipStyle.top = `${top - 16}px`;
+    tooltipStyle.transform = 'translate(-50%, calc(-100% - 16px))';
+    tooltipStyle.top = `${top}px`;
   } else if (currentStep.position === 'left') {
     tooltipStyle.transform = 'translate(calc(-100% - 16px), -50%)';
     tooltipStyle.top = `${top + height / 2}px`;
@@ -108,16 +111,16 @@ const Tutorial: React.FC<TutorialProps> = ({ onFinish }) => {
         style={{ top: top - 8, left: left - 8, width: width + 16, height: height + 16 }}
       ></div>
 
-      <div style={tooltipStyle} className="z-50 w-80 p-5 bg-white dark:bg-gray-800 rounded-lg shadow-xl text-gray-800 dark:text-gray-200">
+      <div style={tooltipStyle} className="z-50 w-80 p-5 bg-white dark:bg-slate-800 rounded-lg shadow-xl text-slate-800 dark:text-slate-200">
         <h4 className="font-bold text-lg mb-2">{currentStep.title}</h4>
         <p className="text-sm mb-4">{currentStep.text}</p>
         <div className="flex justify-between items-center">
-          <span className="text-xs text-gray-500">{stepIndex + 1} / {tutorialSteps.length}</span>
+          <span className="text-xs text-slate-500">{stepIndex + 1} / {tutorialSteps.length}</span>
           <div>
-            <button onClick={handleSkip} className="text-sm text-gray-600 dark:text-gray-400 hover:underline mr-4">Langkau</button>
+            <button onClick={handleSkip} className="text-sm text-slate-600 dark:text-slate-400 hover:underline mr-4 font-medium">Langkau</button>
             <button
               onClick={handleNext}
-              className="px-4 py-2 bg-primary-600 text-white font-semibold rounded-md hover:bg-primary-700"
+              className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700"
             >
               {stepIndex === tutorialSteps.length - 1 ? 'Selesai' : 'Seterusnya'}
             </button>

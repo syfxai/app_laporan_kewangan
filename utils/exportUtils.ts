@@ -1,4 +1,3 @@
-
 import { Transaction, Category } from '../types';
 
 declare const jspdf: any;
@@ -11,13 +10,14 @@ export const exportToPDF = (transactions: Transaction[], categories: Category[],
 
   doc.text(`Laporan Kewangan - ${period}`, 14, 16);
   
-  const tableColumn = ["Tarikh", "Jenis", "Keterangan", "Kategori", "Jumlah (RM)"];
+  const tableColumn = ["Tarikh", "Jenis", "Status", "Keterangan", "Kategori", "Jumlah (RM)"];
   const tableRows: (string | number)[][] = [];
 
   transactions.forEach(transaction => {
     const transactionData = [
       transaction.date,
       transaction.type === 'income' ? 'Masuk' : 'Keluar',
+      transaction.status === 'cleared' ? 'Lunas' : 'Belum Lunas',
       transaction.description,
       categoryMap.get(transaction.categoryId) || 'N/A',
       transaction.amount.toFixed(2),
@@ -29,9 +29,9 @@ export const exportToPDF = (transactions: Transaction[], categories: Category[],
   const totalExpense = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
   const balance = totalIncome - totalExpense;
 
-  tableRows.push(['', '', '', 'Jumlah Masuk:', totalIncome.toFixed(2)]);
-  tableRows.push(['', '', '', 'Jumlah Keluar:', totalExpense.toFixed(2)]);
-  tableRows.push(['', '', '', 'Baki:', balance.toFixed(2)]);
+  tableRows.push(['', '', '', '', 'Jumlah Masuk:', totalIncome.toFixed(2)]);
+  tableRows.push(['', '', '', '', 'Jumlah Keluar:', totalExpense.toFixed(2)]);
+  tableRows.push(['', '', '', '', 'Baki:', balance.toFixed(2)]);
 
   doc.autoTable({
     head: [tableColumn],
@@ -51,6 +51,7 @@ export const exportToExcel = (transactions: Transaction[], categories: Category[
   const data = transactions.map(transaction => ({
     Tarikh: transaction.date,
     Jenis: transaction.type === 'income' ? 'Masuk' : 'Keluar',
+    Status: transaction.status === 'cleared' ? 'Lunas' : 'Belum Lunas',
     Keterangan: transaction.description,
     Kategori: categoryMap.get(transaction.categoryId) || 'N/A',
     'Jumlah (RM)': transaction.amount,

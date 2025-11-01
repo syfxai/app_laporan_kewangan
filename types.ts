@@ -1,8 +1,9 @@
-
 export enum TransactionType {
   INCOME = 'income',
-  EXPENSE = 'expense'
+  EXPENSE = 'expense',
 }
+
+export type TransactionStatus = 'cleared' | 'pending';
 
 export interface Transaction {
   id: string;
@@ -11,6 +12,7 @@ export interface Transaction {
   description: string;
   amount: number;
   categoryId: string;
+  status: TransactionStatus;
 }
 
 export interface Category {
@@ -19,9 +21,3 @@ export interface Category {
 }
 
 export type View = 'dashboard' | 'transactions' | 'reports';
-
-export interface ChartData {
-  name: string;
-  income: number;
-  expense: number;
-}
