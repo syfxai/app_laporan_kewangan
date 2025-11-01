@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Transaction, Category, TransactionType, TransactionStatus } from '../types';
 import Modal from './Modal';
 import TransactionForm from './TransactionForm';
-import { PlusIcon, EditIcon, TrashIcon, SearchIcon, CalendarIcon, CheckCircleIcon, ClockIcon } from './icons';
+import { PlusIcon, EditIcon, TrashIcon, SearchIcon, CalendarIcon, CheckCircleIcon, ClockIcon, ChevronDownIcon } from './icons';
 import Tooltip from './Tooltip';
 
 interface TransactionListProps {
@@ -94,13 +94,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, categor
           setDateRange({ start: '', end: '' });
       }
   };
-  
-  const InputField: React.FC<{children: React.ReactNode, className?: string}> = ({children, className}) => (
-      <div className={`w-full p-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 flex items-center gap-2 ${className}`}>
-        {children}
-      </div>
-  );
-  
+    
   return (
     <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -113,59 +107,64 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, categor
 
       {/* Filters and Search */}
       <div className="space-y-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            <div className="md:col-span-3 lg:col-span-2">
-                <InputField>
-                    <SearchIcon className="text-slate-400" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="md:col-span-2">
+                 <div className="relative">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                      <SearchIcon className="text-slate-400" />
+                    </div>
                     <input
                         type="text"
                         placeholder="Cari keterangan atau kategori..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full bg-transparent focus:outline-none"
+                        className="w-full p-2 pl-10 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                </InputField>
+                </div>
             </div>
             
-            <InputField>
-                <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as any)} className="w-full bg-transparent focus:outline-none appearance-none">
+            <div className="relative">
+                <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as any)} className="w-full p-2 pr-8 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
                     <option value="all">Semua Status</option>
                     <option value={'cleared'}>Lunas</option>
                     <option value={'pending'}>Belum Lunas</option>
                 </select>
-            </InputField>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400"><ChevronDownIcon /></div>
+            </div>
 
-            <InputField>
-                <select value={filterType} onChange={(e) => setFilterType(e.target.value as any)} className="w-full bg-transparent focus:outline-none appearance-none">
+            <div className="relative">
+                <select value={filterType} onChange={(e) => setFilterType(e.target.value as any)} className="w-full p-2 pr-8 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
                     <option value="all">Semua Jenis</option>
                     <option value={TransactionType.INCOME}>Masuk</option>
                     <option value={TransactionType.EXPENSE}>Keluar</option>
                 </select>
-            </InputField>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400"><ChevronDownIcon /></div>
+            </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
              <div>
                 <label className="text-xs text-slate-500 dark:text-slate-400 ml-1 mb-1 block">Kategori</label>
-                <InputField>
-                    <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="w-full bg-transparent focus:outline-none appearance-none">
+                <div className="relative">
+                    <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="w-full p-2 pr-8 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
                         <option value="all">Semua Kategori</option>
                         {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
-                </InputField>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400"><ChevronDownIcon /></div>
+                </div>
             </div>
             <div>
                 <label className="text-xs text-slate-500 dark:text-slate-400 ml-1 mb-1 block">Dari Tarikh</label>
-                <InputField>
-                    <CalendarIcon className="text-slate-400" />
+                <div className="relative flex items-center p-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 focus-within:ring-2 focus-within:ring-blue-500">
+                    <CalendarIcon className="text-slate-400 mr-2" />
                     <input type="date" name="start" value={dateRange.start} onChange={handleDateRangeChange} className="w-full bg-transparent focus:outline-none"/>
-                </InputField>
+                </div>
             </div>
             <div>
                  <label className="text-xs text-slate-500 dark:text-slate-400 ml-1 mb-1 block">Hingga Tarikh</label>
-                <InputField>
-                    <CalendarIcon className="text-slate-400" />
+                 <div className="relative flex items-center p-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 focus-within:ring-2 focus-within:ring-blue-500">
+                    <CalendarIcon className="text-slate-400 mr-2" />
                     <input type="date" name="end" value={dateRange.end} onChange={handleDateRangeChange} className="w-full bg-transparent focus:outline-none"/>
-                </InputField>
+                </div>
             </div>
             <div className="flex gap-2 justify-start md:justify-end">
                 <button onClick={() => setDatePreset('this_month')} className="px-3 py-2 text-sm bg-slate-200 dark:bg-slate-700 rounded-md hover:bg-blue-500 hover:text-white dark:hover:bg-blue-600 transition-colors">Bulan Ini</button>

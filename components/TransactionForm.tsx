@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Transaction, Category, TransactionType, TransactionStatus } from '../types';
 import Tooltip from './Tooltip';
-import { InformationCircleIcon } from './icons';
+import { InformationCircleIcon, ChevronDownIcon } from './icons';
 
 type TransactionFormData = Omit<Transaction, 'id'>;
 
@@ -74,7 +74,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ categories, onSubmit,
     onSubmit(formData);
   };
   
-  const inputBaseClasses = "mt-1 block w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-900";
+  const inputBaseClasses = "block w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-900";
   
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -118,7 +118,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ categories, onSubmit,
             required
             min="0.01"
             step="0.01"
-            className={inputBaseClasses}
+            className={`${inputBaseClasses} mt-1`}
           />
         </div>
          <div>
@@ -130,7 +130,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ categories, onSubmit,
             value={formData.date}
             onChange={handleChange}
             required
-            className={inputBaseClasses}
+            className={`${inputBaseClasses} mt-1`}
           />
         </div>
       </div>
@@ -150,25 +150,30 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ categories, onSubmit,
           onChange={handleChange}
           required
           placeholder="Cth: Bayaran bil elektrik"
-          className={inputBaseClasses}
+          className={`${inputBaseClasses} mt-1`}
         />
       </div>
 
       <div>
         <label htmlFor="categoryId" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Kategori</label>
-        <select
-          id="categoryId"
-          name="categoryId"
-          value={formData.categoryId}
-          onChange={handleChange}
-          required
-          className={inputBaseClasses}
-        >
-          <option value="" disabled>-- Sila pilih kategori --</option>
-          {categories.map(cat => (
-            <option key={cat.id} value={cat.id}>{cat.name}</option>
-          ))}
-        </select>
+        <div className="relative mt-1">
+            <select
+              id="categoryId"
+              name="categoryId"
+              value={formData.categoryId}
+              onChange={handleChange}
+              required
+              className={`${inputBaseClasses} appearance-none pr-8`}
+            >
+              <option value="" disabled>-- Sila pilih kategori --</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+                <ChevronDownIcon />
+            </div>
+        </div>
       </div>
       
       <div className="flex justify-end pt-4">

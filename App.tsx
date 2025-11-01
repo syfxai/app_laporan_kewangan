@@ -10,6 +10,7 @@ import { generateSampleData } from './utils/sampleData';
 
 const App: React.FC = () => {
   const [theme, setTheme] = useLocalStorage<'light' | 'dark'>('theme', 'light');
+  const [fontSize, setFontSize] = useLocalStorage<'sm' | 'base' | 'lg'>('fontSize', 'base');
   const [transactions, setTransactions] = useLocalStorage<Transaction[]>('transactions', []);
   const [categories, setCategories] = useLocalStorage<Category[]>('categories', [
     { id: '1', name: 'Utiliti' },
@@ -17,6 +18,7 @@ const App: React.FC = () => {
     { id: '3', name: 'Sewa' },
     { id: '4', name: 'Acara' },
     { id: '5', name: 'Sumbangan' },
+    { id: '7', name: 'Pendaftaran Ahli' },
     { id: '6', name: 'Lain-lain' },
   ]);
 
@@ -41,6 +43,12 @@ const App: React.FC = () => {
       document.documentElement.classList.remove('dark');
     }
   }, [theme]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove('text-sm', 'text-base', 'text-lg');
+    root.classList.add(`text-${fontSize}`);
+  }, [fontSize]);
 
   const toggleTheme = () => {
     setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
@@ -108,7 +116,7 @@ const App: React.FC = () => {
                     description: columns[3].slice(1, -1).replace(/""/g, '"'), // handle quotes
                     amount: parseFloat(columns[4]),
                     categoryId: columns[5],
-                    status: (columns[6] as TransactionStatus) || 'cleared'
+                    status: (columns[6]?.trim() as TransactionStatus) || 'cleared'
                 };
             }).filter((t): t is Transaction => !!(t !== null && t.id && t.date && t.type && t.description && !isNaN(t.amount) && t.categoryId && t.status));
 
@@ -154,6 +162,8 @@ const App: React.FC = () => {
         setView={setView}
         theme={theme}
         toggleTheme={toggleTheme}
+        fontSize={fontSize}
+        setFontSize={setFontSize}
         onBackup={handleBackup}
         onRestore={handleRestore}
         onStartTutorial={startTutorial}

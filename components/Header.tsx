@@ -7,12 +7,44 @@ interface HeaderProps {
   setView: (view: View) => void;
   theme: 'light' | 'dark';
   toggleTheme: () => void;
+  fontSize: 'sm' | 'base' | 'lg';
+  setFontSize: (size: 'sm' | 'base' | 'lg') => void;
   onBackup: () => void;
   onRestore: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onStartTutorial: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ currentView, setView, theme, toggleTheme, onBackup, onRestore, onStartTutorial }) => {
+const FontSizeToggle: React.FC<{
+    fontSize: 'sm' | 'base' | 'lg';
+    setFontSize: (size: 'sm' | 'base' | 'lg') => void;
+}> = ({ fontSize, setFontSize }) => {
+    const sizes = [
+        { key: 'sm', label: 'K' },
+        { key: 'base', label: 'N' },
+        { key: 'lg', label: 'B' },
+    ] as const;
+
+    return (
+        <div className="flex items-center bg-slate-200/60 dark:bg-slate-700/60 p-1 rounded-full">
+            {sizes.map(size => (
+                <button
+                    key={size.key}
+                    onClick={() => setFontSize(size.key)}
+                    className={`w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold transition-colors duration-200 ${
+                        fontSize === size.key
+                            ? 'bg-white dark:bg-slate-900/70 text-blue-600 dark:text-blue-400 shadow'
+                            : 'text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-800/50'
+                    }`}
+                    title={`Saiz ${size.key === 'sm' ? 'Kecil' : size.key === 'base' ? 'Normal' : 'Besar'}`}
+                >
+                    {size.label}
+                </button>
+            ))}
+        </div>
+    );
+};
+
+const Header: React.FC<HeaderProps> = ({ currentView, setView, theme, toggleTheme, fontSize, setFontSize, onBackup, onRestore, onStartTutorial }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const restoreInputRef = useRef<HTMLInputElement>(null);
 
@@ -63,6 +95,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, setView, theme, toggleThem
           </div>
           <div className="hidden md:flex items-center space-x-2">
             <IconButton onClick={onStartTutorial} title="Mulakan Tutorial"><LifebuoyIcon /></IconButton>
+            <FontSizeToggle fontSize={fontSize} setFontSize={setFontSize} />
             <IconButton onClick={onBackup} title="Backup Data (CSV)"><DownloadIcon /></IconButton>
             <IconButton onClick={handleRestoreClick} title="Restore Data (CSV)"><UploadIcon /></IconButton>
             <input type="file" ref={restoreInputRef} onChange={onRestore} accept=".csv" className="hidden" />
@@ -90,6 +123,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, setView, theme, toggleThem
           <div className="pt-4 pb-3 border-t border-slate-200 dark:border-slate-700">
             <div className="flex items-center justify-around px-5">
               <IconButton onClick={onStartTutorial} title="Mulakan Tutorial"><LifebuoyIcon /></IconButton>
+              <FontSizeToggle fontSize={fontSize} setFontSize={setFontSize} />
               <IconButton onClick={onBackup} title="Backup Data (CSV)"><DownloadIcon /></IconButton>
               <IconButton onClick={handleRestoreClick} title="Restore Data (CSV)"><UploadIcon /></IconButton>
               <IconButton onClick={toggleTheme} title="Tukar Mod">{theme === 'light' ? <MoonIcon /> : <SunIcon />}</IconButton>

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Transaction, Category, TransactionType } from '../types';
 import { exportToPDF, exportToExcel } from '../utils/exportUtils';
-import { DownloadIcon, PrinterIcon } from './icons';
+import { DownloadIcon, PrinterIcon, ChevronDownIcon } from './icons';
 
 interface ReportsProps {
   transactions: Transaction[];
@@ -80,16 +80,22 @@ const Reports: React.FC<ReportsProps> = ({ transactions, categories }) => {
       <div className="flex flex-col sm:flex-row gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
         <div>
           <label htmlFor="year-select" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tahun</label>
-          <select id="year-select" value={selectedYear} onChange={e => setSelectedYear(parseInt(e.target.value))} className="w-full sm:w-48 p-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            {years.map(y => <option key={y} value={y}>{y}</option>)}
-          </select>
+           <div className="relative">
+              <select id="year-select" value={selectedYear} onChange={e => setSelectedYear(parseInt(e.target.value))} className="w-full sm:w-48 p-2 pr-8 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
+                {years.map(y => <option key={y} value={y}>{y}</option>)}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400"><ChevronDownIcon /></div>
+           </div>
         </div>
         <div>
           <label htmlFor="month-select" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Bulan</label>
-          <select id="month-select" value={selectedMonth} onChange={e => setSelectedMonth(e.target.value === 'all' ? 'all' : parseInt(e.target.value))} className="w-full sm:w-48 p-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="all">Sepanjang Tahun</option>
-            {months.map(m => <option key={m.value} value={m.value}>{m.name}</option>)}
-          </select>
+          <div className="relative">
+            <select id="month-select" value={selectedMonth} onChange={e => setSelectedMonth(e.target.value === 'all' ? 'all' : parseInt(e.target.value))} className="w-full sm:w-48 p-2 pr-8 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
+              <option value="all">Sepanjang Tahun</option>
+              {months.map(m => <option key={m.value} value={m.value}>{m.name}</option>)}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400"><ChevronDownIcon /></div>
+          </div>
         </div>
       </div>
       
