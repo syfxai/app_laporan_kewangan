@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard';
 import TransactionList from './components/TransactionList';
 import Reports from './components/Reports';
 import Tutorial from './components/Tutorial';
+import Footer from './components/Footer';
 import { generateSampleData } from './utils/sampleData';
 
 const App: React.FC = () => {
@@ -156,7 +157,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen font-sans text-slate-800 dark:text-slate-200 transition-colors duration-300 ${isTutorialActive ? 'overflow-hidden' : ''}`}>
+    <div className={`min-h-screen font-sans text-slate-800 dark:text-slate-200 transition-colors duration-300 flex flex-col ${isTutorialActive ? 'overflow-hidden' : ''}`}>
       <Header 
         currentView={view}
         setView={setView}
@@ -168,9 +169,10 @@ const App: React.FC = () => {
         onRestore={handleRestore}
         onStartTutorial={startTutorial}
       />
-      <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+      <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full flex-grow">
         {renderView()}
       </main>
+      <Footer />
       {isTutorialActive && <Tutorial onFinish={() => setTutorialActive(false)} />}
     </div>
   );
