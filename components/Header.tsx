@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { View } from '../types';
-import { SunIcon, MoonIcon, MenuIcon, XIcon, DownloadIcon, UploadIcon, LifebuoyIcon } from './icons';
+import { SunIcon, MoonIcon, MenuIcon, XIcon, DownloadIcon, UploadIcon, LifebuoyIcon, ArrowPathIcon } from './icons';
 
 interface HeaderProps {
   currentView: View;
@@ -12,6 +12,7 @@ interface HeaderProps {
   onBackup: () => void;
   onRestore: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onStartTutorial: () => void;
+  onResetData: () => void;
 }
 
 const FontSizeToggle: React.FC<{
@@ -44,7 +45,7 @@ const FontSizeToggle: React.FC<{
     );
 };
 
-const Header: React.FC<HeaderProps> = ({ currentView, setView, theme, toggleTheme, fontSize, setFontSize, onBackup, onRestore, onStartTutorial }) => {
+const Header: React.FC<HeaderProps> = ({ currentView, setView, theme, toggleTheme, fontSize, setFontSize, onBackup, onRestore, onStartTutorial, onResetData }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const restoreInputRef = useRef<HTMLInputElement>(null);
 
@@ -98,6 +99,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, setView, theme, toggleThem
             <FontSizeToggle fontSize={fontSize} setFontSize={setFontSize} />
             <IconButton onClick={onBackup} title="Backup Data (CSV)"><DownloadIcon /></IconButton>
             <IconButton onClick={handleRestoreClick} title="Restore Data (CSV)"><UploadIcon /></IconButton>
+            <IconButton onClick={onResetData} title="Set Semula Data"><ArrowPathIcon /></IconButton>
             <input type="file" ref={restoreInputRef} onChange={onRestore} accept=".csv" className="hidden" />
             <IconButton onClick={toggleTheme} title="Tukar Mod">{theme === 'light' ? <MoonIcon /> : <SunIcon />}</IconButton>
           </div>
@@ -126,6 +128,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, setView, theme, toggleThem
               <FontSizeToggle fontSize={fontSize} setFontSize={setFontSize} />
               <IconButton onClick={onBackup} title="Backup Data (CSV)"><DownloadIcon /></IconButton>
               <IconButton onClick={handleRestoreClick} title="Restore Data (CSV)"><UploadIcon /></IconButton>
+              <IconButton onClick={onResetData} title="Set Semula Data"><ArrowPathIcon /></IconButton>
               <IconButton onClick={toggleTheme} title="Tukar Mod">{theme === 'light' ? <MoonIcon /> : <SunIcon />}</IconButton>
             </div>
           </div>

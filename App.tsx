@@ -138,6 +138,14 @@ const App: React.FC = () => {
     event.target.value = ''; // Reset input
   };
   
+  const handleResetData = () => {
+    if (window.confirm("Anda pasti mahu set semula semua data kepada data sampel? Semua rekod sedia ada akan dipadam dan tidak boleh dikembalikan.")) {
+        localStorage.removeItem('transactions');
+        localStorage.removeItem('isInitialLoad');
+        window.location.reload();
+    }
+  };
+
   const startTutorial = () => {
     setView('dashboard');
     setTutorialActive(true);
@@ -168,6 +176,7 @@ const App: React.FC = () => {
         onBackup={handleBackup}
         onRestore={handleRestore}
         onStartTutorial={startTutorial}
+        onResetData={handleResetData}
       />
       <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full flex-grow">
         {renderView()}
