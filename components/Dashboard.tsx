@@ -242,7 +242,7 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, analysis, categorie
                               <p className="text-xs text-slate-500 dark:text-slate-400">{new Date(t.date).toLocaleDateString('ms-MY', { day: '2-digit', month: 'short', year: 'numeric' })} &bull; {categoryMap.get(t.categoryId)}</p>
                           </div>
                           <div className="flex items-center gap-3">
-                              <p className="font-semibold text-sm text-red-500">-RM{t.amount.toLocaleString('ms-MY', {minimumFractionDigits: 2})}</p>
+                              <p className={`font-semibold text-sm ${t.type === TransactionType.INCOME ? 'text-green-500' : 'text-red-500'}`}>{t.type === TransactionType.INCOME ? '+' : '-'}RM{t.amount.toLocaleString('ms-MY', {minimumFractionDigits: 2})}</p>
                               <div className="flex items-center gap-1">
                                   <CustomTooltip text="Kemaskini">
                                     <button onClick={() => handleEditClick(t)} className="p-1.5 rounded-md text-slate-500 hover:text-blue-600 hover:bg-slate-200/60 dark:hover:text-blue-400 dark:hover:bg-slate-700/60"><EditIcon /></button>
