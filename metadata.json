@@ -1,0 +1,5 @@
+{
+  "name": "Pengurus Kewangan Pertubuhan",
+  "description": "A web application to track income and expenses for an organization, featuring automated analysis, reporting, data export (PDF/Excel), and backup/restore functionality. Includes an interactive tutorial and dark mode for a user-friendly experience.",
+  "requestFramePermissions": []
+}
