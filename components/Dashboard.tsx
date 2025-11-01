@@ -3,7 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { Transaction, Category, TransactionType, TransactionStatus } from '../types';
 import Modal from './Modal';
 import TransactionForm from './TransactionForm';
-import { PlusIcon, EditIcon, TrashIcon, ArrowUpRightIcon, ArrowDownLeftIcon, ScaleIcon, CheckCircleIcon, ClockIcon } from './icons';
+import { PlusIcon, EditIcon, TrashIcon, ArrowUpRightIcon, ArrowDownLeftIcon, ScaleIcon, CheckCircleIcon, ClockIcon, ExclamationTriangleIcon } from './icons';
 import CustomTooltip from './Tooltip';
 
 interface DashboardProps {
@@ -49,6 +49,7 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, analysis, categorie
   const [isModalOpen, setModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [chartView, setChartView] = useState<'monthly' | 'yearly'>('monthly');
+  const [chartYear, setChartYear] = useState(new Date().getFullYear());
 
   const categoryMap = useMemo(() => new Map(categories.map(c => [c.id, c.name])), [categories]);
 
@@ -56,28 +57,32 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, analysis, categorie
     return [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
   }, [transactions]);
   
+  const availableYears = useMemo(() => {
+    const years = new Set(transactions.map(t => new Date(t.date).getFullYear()));
+    return Array.from(years).sort((a, b) => b - a);
+  }, [transactions]);
+
   const chartData = useMemo(() => {
     if (chartView === 'monthly') {
-      const data: { [key: string]: { income: number, expense: number, name: string } } = {};
-      const monthsToShow = 6;
-      const today = new Date();
-
-      for (let i = monthsToShow - 1; i >= 0; i--) {
-          const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-          const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-          const monthName = d.toLocaleString('ms-MY', { month: 'short', year: '2-digit' });
-          data[monthKey] = { income: 0, expense: 0, name: monthName };
-      }
-      
-      transactions.forEach(t => {
-          const transactionDate = new Date(t.date);
-          const monthKey = `${transactionDate.getFullYear()}-${String(transactionDate.getMonth() + 1).padStart(2, '0')}`;
-          if (data[monthKey]) {
-              if (t.type === TransactionType.INCOME) data[monthKey].income += t.amount;
-              else data[monthKey].expense += t.amount;
-          }
+      const months = Array.from({ length: 12 }, (_, i) => {
+          const d = new Date(chartYear, i, 1);
+          return {
+              name: d.toLocaleString('ms-MY', { month: 'short' }),
+              income: 0,
+              expense: 0,
+          };
       });
-      return Object.values(data);
+
+      transactions
+        .filter(t => new Date(t.date).getFullYear() === chartYear)
+        .forEach(t => {
+            const monthIndex = new Date(t.date).getMonth();
+            if (t.type === TransactionType.INCOME) months[monthIndex].income += t.amount;
+            else months[monthIndex].expense += t.amount;
+        });
+      
+      return months;
+
     } else { // yearly view
         const data: { [key: string]: { income: number, expense: number, name: string } } = {};
         transactions.forEach(t => {
@@ -90,7 +95,12 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, analysis, categorie
         });
         return Object.values(data).sort((a, b) => a.name.localeCompare(b.name));
     }
-  }, [transactions, chartView]);
+  }, [transactions, chartView, chartYear]);
+  
+  const pendingTransactions = useMemo(() => {
+    return transactions.filter(t => t.status === 'pending')
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [transactions]);
 
   const handleAddClick = () => {
     setEditingTransaction(null);
@@ -108,7 +118,10 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, analysis, categorie
     }
   };
   
-  const formatYAxis = (tickItem: number) => `RM${(tickItem / 1000).toLocaleString()}k`;
+  const formatYAxis = (tickItem: number) => {
+    if (tickItem >= 1000) return `RM${(tickItem / 1000).toLocaleString()}k`;
+    return `RM${tickItem}`;
+  }
 
   return (
     <div className="space-y-6">
@@ -122,16 +135,21 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, analysis, categorie
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Monthly Chart */}
         <div className="lg:col-span-3 bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm" data-tutorial="step-3">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
                 <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Analisa Aliran Tunai</h3>
-                 <div className="flex bg-slate-100 dark:bg-slate-700 p-1 rounded-lg text-sm">
+                 <div className="flex items-center bg-slate-100 dark:bg-slate-700 p-1 rounded-lg text-sm">
+                    {chartView === 'monthly' && (
+                       <select value={chartYear} onChange={(e) => setChartYear(parseInt(e.target.value))} className="bg-transparent font-semibold focus:outline-none pr-2">
+                           {availableYears.map(year => <option key={year} value={year}>{year}</option>)}
+                       </select>
+                    )}
                     <button onClick={() => setChartView('monthly')} className={`px-3 py-1 rounded-md font-semibold transition-colors ${chartView === 'monthly' ? 'bg-white dark:bg-slate-800 shadow text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}>Bulanan</button>
                     <button onClick={() => setChartView('yearly')} className={`px-3 py-1 rounded-md font-semibold transition-colors ${chartView === 'yearly' ? 'bg-white dark:bg-slate-800 shadow text-blue-600' : 'text-slate-600 dark:text-slate-300'}`}>Tahunan</button>
                 </div>
             </div>
             <div style={{ width: '100%', height: 300 }}>
                 <ResponsiveContainer>
-                    <BarChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                    <BarChart data={chartData} margin={{ top: 5, right: 20, left: -15, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} vertical={false} />
                         <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
                         <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={formatYAxis} />
@@ -167,7 +185,7 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, analysis, categorie
                   </div>
                   <div>
                     <p className="font-semibold text-sm text-slate-700 dark:text-slate-200">{t.description}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{new Date(t.date).toLocaleDateString('ms-MY', { day: 'numeric', month: 'short' })} &bull; {categoryMap.get(t.categoryId) || 'N/A'}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{new Date(t.date).toLocaleDateString('ms-MY', { day: 'numeric', month: 'short', year: '2-digit' })} &bull; {categoryMap.get(t.categoryId) || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="text-right flex flex-col items-end">
@@ -194,6 +212,49 @@ const Dashboard: React.FC<DashboardProps> = ({ transactions, analysis, categorie
         </div>
       </div>
       
+      {/* Pending Transactions Section */}
+      <div className="bg-amber-50 dark:bg-amber-900/20 p-6 rounded-xl border border-amber-200 dark:border-amber-500/30 shadow-sm">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-amber-100 dark:bg-amber-500/10 rounded-full">
+                <ExclamationTriangleIcon className="h-6 w-6 text-amber-500 dark:text-amber-400" />
+            </div>
+            <h3 className="text-lg font-bold text-amber-800 dark:text-amber-300">Untuk Perhatian: Transaksi Belum Lunas</h3>
+          </div>
+           <div className="space-y-4">
+            {pendingTransactions.length > 0 ? pendingTransactions.map(t => (
+              <div key={t.id} className="flex items-center justify-between group bg-white dark:bg-slate-800/50 p-3 rounded-lg">
+                <div className="flex items-center gap-3">
+                   <div>
+                    <p className="font-semibold text-sm text-slate-700 dark:text-slate-200">{t.description}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{new Date(t.date).toLocaleDateString('ms-MY', { day: 'numeric', month: 'short', year: 'numeric' })} &bull; {categoryMap.get(t.categoryId) || 'N/A'}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <p className={`font-bold text-sm ${t.type === TransactionType.INCOME ? 'text-green-500' : 'text-red-500'}`}>
+                    {t.type === TransactionType.INCOME ? '+' : '-'} RM {t.amount.toLocaleString('ms-MY', { minimumFractionDigits: 2 })}
+                  </p>
+                  <div className="flex items-center">
+                      <CustomTooltip text="Kemaskini">
+                        <button onClick={() => handleEditClick(t)} className="p-2 rounded-md text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200 dark:hover:bg-slate-700/60"><EditIcon /></button>
+                      </CustomTooltip>
+                      <CustomTooltip text="Padam">
+                        <button onClick={() => handleDeleteClick(t.id)} className="p-2 rounded-md text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-slate-200 dark:hover:bg-slate-700/60"><TrashIcon /></button>
+                      </CustomTooltip>
+                  </div>
+                </div>
+              </div>
+            )) : (
+              <div className="text-center py-8">
+                  <div className="mx-auto w-12 h-12 flex items-center justify-center bg-green-100 dark:bg-green-500/10 rounded-full">
+                      <CheckCircleIcon className="h-7 w-7 text-green-500" />
+                  </div>
+                  <p className="mt-3 font-semibold text-green-800 dark:text-green-300">Syabas! Tiada transaksi yang belum lunas.</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Semua rekod kewangan anda telah dijelaskan.</p>
+              </div>
+            )}
+          </div>
+      </div>
+
       {/* Add Transaction FAB */}
       <div className="fixed bottom-6 right-6" data-tutorial="step-5">
         <CustomTooltip text="Tambah Rekod Baru">
